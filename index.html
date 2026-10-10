@@ -22,6 +22,12 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172014}
  font-weight:850;line-height:1;letter-spacing:-.04em;
  font-variant-numeric:tabular-nums;white-space:nowrap;
 }
+
+/* Musiksteuerung: nur innerhalb der Bildfläche, Countdown bleibt unverändert. */
+.music-button{position:absolute;bottom:3.5%;z-index:5;width:44px;height:44px;border:1px solid rgba(255,255,255,.38);border-radius:50%;background:rgba(16,22,22,.48);color:white;display:none;align-items:center;justify-content:center;cursor:pointer;padding:0;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);touch-action:manipulation}
+.music-button.left{left:4%}.music-button.right{right:4%}
+.music-button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.music-button:focus-visible{outline:3px solid white;outline-offset:3px}
 </style>
 </head>
 <body>
@@ -29,6 +35,13 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172014}
 <main class="stage" aria-label="WiDo 2027 Countdown">
 <img class="photo" id="photo" alt="Wickersdorf 2027">
 <span class="number" id="days" aria-live="polite">…</span>
+<audio id="music" preload="none"></audio>
+<button id="playPause" class="music-button left" type="button" aria-label="Musik abspielen" title="Musik abspielen">
+ <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+</button>
+<button id="muteToggle" class="music-button right" type="button" aria-label="Ton ausschalten" title="Ton ausschalten">
+ <svg id="volumeIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5zM15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg>
+</button>
 </main>
 <script>
 const TARGET=new Date("2027-09-17T00:00:00+02:00");
@@ -38,6 +51,38 @@ function update(){
  document.getElementById("days").textContent=days.toLocaleString("de-DE");
 }
 update();setInterval(update,30000);
+
+
+/* Ein MP3 im Repository wird automatisch erkannt. Keine MP3 = keine Buttons. */
+function setupMusic(url){
+ const audio=document.getElementById("music");
+ const play=document.getElementById("playPause");
+ const mute=document.getElementById("muteToggle");
+ const playIcon=document.getElementById("playIcon");
+ const volumeIcon=document.getElementById("volumeIcon");
+ audio.src=url;
+ play.style.display="flex";
+ mute.style.display="flex";
+ function render(){
+   const playing=!audio.paused&&!audio.ended;
+   playIcon.innerHTML=playing?'<path d="M7 5v14M17 5v14"/>':'<path d="M8 5v14l11-7z"/>';
+   play.setAttribute("aria-label",playing?"Musik pausieren":"Musik abspielen");
+   play.title=playing?"Musik pausieren":"Musik abspielen";
+   volumeIcon.innerHTML=audio.muted?'<path d="M11 5 6 9H3v6h3l5 4V5zM16 9l5 6m0-6-5 6"/>':'<path d="M11 5 6 9H3v6h3l5 4V5zM15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/>';
+   mute.setAttribute("aria-label",audio.muted?"Ton einschalten":"Ton ausschalten");
+   mute.title=audio.muted?"Ton einschalten":"Ton ausschalten";
+ }
+ play.addEventListener("click",async()=>{
+   if(!audio.paused){audio.pause();return}
+   try{await audio.play()}catch(e){console.info("Musikwiedergabe nicht möglich:",e)}
+   render();
+ });
+ mute.addEventListener("click",()=>{audio.muted=!audio.muted;render()});
+ ["play","pause","ended","volumechange"].forEach(e=>audio.addEventListener(e,render));
+ render();
+ // Browser dürfen automatischen Tonstart verhindern. Play bleibt dann verfügbar.
+ audio.play().catch(()=>render());
+}
 
 (async()=>{
  const photo=document.getElementById("photo");
@@ -49,6 +94,8 @@ update();setInterval(update,30000);
    if(!r.ok) throw new Error("Bild konnte nicht ermittelt werden.");
    const files=await r.json();
    const images=files.filter(f=>f.type==="file"&&/\.(jpe?g|png|webp)$/i.test(f.name));
+   const mp3s=files.filter(f=>f.type==="file"&&/\.mp3$/i.test(f.name));
+   if(mp3s.length===1) setupMusic(mp3s[0].download_url);
    if(images.length!==1) throw new Error(images.length===0 ? "Kein Bild gefunden." : "Bitte genau ein Bild im Repository lassen.");
    const imageUrl=images[0].download_url+"?v="+Date.now();
    photo.src=imageUrl;
