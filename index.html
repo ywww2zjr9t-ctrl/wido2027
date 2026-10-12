@@ -53,7 +53,7 @@ function update(){
 update();setInterval(update,30000);
 
 
-/* Musik: Dateiname frei. Unabhängige Suche und erneuter Versuch bei Fehlern. */
+/* Musik: Dateiname frei; bei mehreren MP3s zufaellige Auswahl pro Aufruf. */
 const audio=document.getElementById("music");
 const play=document.getElementById("playPause");
 const mute=document.getElementById("muteToggle");
@@ -91,13 +91,13 @@ async function findMusic(){
   const entries=await getJson(apiRoot+"/contents");
   if(!Array.isArray(entries))throw Error("Keine Dateiliste");
   const mp3=entries.filter(f=>f.type==="file"&&/\.mp3$/i.test(f.name));
-  if(mp3.length===1)return mp3[0].download_url;
-  if(mp3.length>1)throw Error("Bitte genau eine MP3 im Repository lassen.");
+  if(mp3.length>0)return mp3[Math.floor(Math.random()*mp3.length)].download_url;
  }catch(e){console.warn("MP3-Suche über Contents:",e)}
  const tree=await getJson(apiRoot+"/git/trees/HEAD?recursive=1");
  const mp3=(tree.tree||[]).filter(f=>f.type==="blob"&&!f.path.includes("/")&&/\.mp3$/i.test(f.path));
- if(mp3.length!==1)throw Error(mp3.length?"Bitte genau eine MP3 im Repository lassen.":"Keine MP3 gefunden.");
- return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/HEAD/${mp3[0].path.split("/").map(encodeURIComponent).join("/")}`;
+ if(mp3.length===0)throw Error("Keine MP3 gefunden.");
+ const chosen=mp3[Math.floor(Math.random()*mp3.length)];
+ return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/HEAD/${chosen.path.split("/").map(encodeURIComponent).join("/")}`;
 }
 async function loadMusic(){
  if(musicReady)return true;
@@ -136,8 +136,9 @@ loadMusic().then(ok=>{if(ok)audio.play().catch(()=>renderMusic())});
  try{
    const files=await getJson(apiRoot+"/contents");
    const images=files.filter(f=>f.type==="file"&&/\.(jpe?g|png|webp)$/i.test(f.name));
-   if(images.length!==1) throw new Error(images.length===0 ? "Kein Bild gefunden." : "Bitte genau ein Bild im Repository lassen.");
-   const imageUrl=images[0].download_url+"?v="+Date.now();
+   if(images.length===0) throw new Error("Kein Bild gefunden.");
+   const chosenImage=images[Math.floor(Math.random()*images.length)];
+   const imageUrl=chosenImage.download_url+"?v="+Date.now();
    photo.src=imageUrl;
    backdrop.style.backgroundImage=`url("${imageUrl}")`;
  }catch(e){console.error(e)}
