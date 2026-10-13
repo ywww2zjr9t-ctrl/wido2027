@@ -11,23 +11,34 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172014}
 .backdrop{position:fixed;inset:-5vmax;background-position:center;background-size:cover;background-repeat:no-repeat;filter:blur(24px) brightness(.82);transform:scale(1.1)}
 .stage{position:fixed;left:50%;top:50%;width:min(100vw,56.25vh);height:min(177.78vw,100vh);transform:translate(-50%,-50%);overflow:hidden;box-shadow:0 0 30px rgba(0,0,0,.28)}
 .photo{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
-.number{
- position:absolute;
- left:64.0%;
- top:33.55%;
- transform:translate(-50%,-50%);
- color:#050505;
- font-family:"Arial Narrow","Helvetica Neue Condensed",Arial,Helvetica,sans-serif;
- font-size:calc(min(100vw,56.25vh)*.073);
- font-weight:850;line-height:1;letter-spacing:-.04em;
- font-variant-numeric:tabular-nums;white-space:nowrap;
-}
+.number{position:absolute;left:64.0%;top:33.55%;transform:translate(-50%,-50%);color:#050505;font-family:"Arial Narrow","Helvetica Neue Condensed",Arial,Helvetica,sans-serif;font-size:calc(min(100vw,56.25vh)*.073);font-weight:850;line-height:1;letter-spacing:-.04em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.player{position:absolute;z-index:6;bottom:2%;left:3%;right:3%;padding:11px 12px;border-radius:17px;background:rgba(12,20,22,.76);color:white;font:13px -apple-system,BlinkMacSystemFont,Arial,sans-serif;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.track-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;font-size:14px;font-weight:650;margin-bottom:5px}
+.controls{display:flex;align-items:center;justify-content:center;gap:clamp(6px,3vw,14px)}
+.controls button{flex:0 0 42px;height:42px;border:1px solid #ffffff66;border-radius:50%;background:#ffffff18;color:white;font-size:18px;cursor:pointer}
+.controls #playPause{flex-basis:48px;height:48px;background:rgba(255,255,255,.26);font-size:22px}
+.progress-row{display:flex;align-items:center;gap:8px;margin:8px 0 5px;font-size:11px;font-variant-numeric:tabular-nums;color:#f0f0f0}
+.progress-row span{min-width:34px;text-align:center}
+.progress-row input{flex:1;min-width:0;width:100%;accent-color:#f0f0f0;cursor:pointer}
+.progress-row input:disabled{opacity:.5}
+.picker-wrap{position:relative;margin-top:8px}
+.picker-wrap:after{content:"⌄";position:absolute;right:12px;top:50%;transform:translateY(-57%);font-size:21px;font-weight:700;color:white;pointer-events:none}
+.picker-caption{font-size:10px;color:#ffffffb8;margin-bottom:3px;text-align:left}
+@media(max-width:350px){.player{padding:8px}.controls{gap:6px}}
+.track-picker{appearance:none;-webkit-appearance:none;width:100%;border-radius:9px;padding:10px 34px 10px 11px;background:#ffffff21;color:white;border:1px solid #ffffff66;font-weight:600;font-size:13px;cursor:pointer;text-overflow:ellipsis}.track-picker option{background:#26302d;color:white}
+.player button:focus-visible,.track-picker:focus-visible{outline:2px solid white;outline-offset:2px}
 
-/* Musiksteuerung: nur innerhalb der Bildfläche, Countdown bleibt unverändert. */
-.music-button{position:absolute;bottom:3.5%;z-index:5;width:44px;height:44px;border:1px solid rgba(255,255,255,.38);border-radius:50%;background:rgba(16,22,22,.48);color:white;display:none;align-items:center;justify-content:center;cursor:pointer;padding:0;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);touch-action:manipulation}
-.music-button.left{left:4%}.music-button.right{right:4%}
-.music-button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.music-button:focus-visible{outline:3px solid white;outline-offset:3px}
+/* Ruhige iOS-inspirierte Symbole statt Emoji; Countdown und Bild bleiben unverändert. */
+.controls button{display:grid;place-items:center;transition:background .2s,transform .2s;border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.13);-webkit-tap-highlight-color:transparent}
+.controls button:active{transform:scale(.93);background:rgba(255,255,255,.30)}
+.controls button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.controls #playPause svg{width:26px;height:26px}
+.player{transition:opacity .32s ease,transform .32s ease,visibility .32s;transform-origin:bottom center}
+.player.collapsed{opacity:0;transform:translateY(16px) scale(.96);visibility:hidden;pointer-events:none}
+.show-player{position:absolute;z-index:7;bottom:2.2%;left:50%;transform:translateX(-50%);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:10px 17px;min-height:42px;background:rgba(12,20,22,.68);color:#fff;font:600 13px -apple-system,BlinkMacSystemFont,Arial,sans-serif;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;white-space:nowrap}
+.show-player[hidden]{display:none}
+.show-player:focus-visible{outline:2px solid white;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.player,.controls button{transition:none}}
 </style>
 </head>
 <body>
@@ -36,113 +47,130 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#172014}
 <img class="photo" id="photo" alt="Wickersdorf 2027">
 <span class="number" id="days" aria-live="polite">…</span>
 <audio id="music" preload="none"></audio>
-<button id="playPause" class="music-button left" type="button" aria-label="Musik abspielen" title="Musik abspielen">
- <svg id="playIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-</button>
-<button id="muteToggle" class="music-button right" type="button" aria-label="Ton ausschalten" title="Ton ausschalten">
- <svg id="volumeIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5zM15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg>
-</button>
+<section class="player" id="player" aria-label="Musiksteuerung">
+<div class="track-title" id="trackTitle">Musik wird gesucht …</div>
+<div class="controls">
+<button id="previous" type="button" aria-label="Vorheriger Titel" title="Vorheriger Titel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14M19 6l-12 6 12 6z"/></svg></button>
+<button id="playPause" type="button" aria-label="Abspielen" title="Abspielen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+<button id="next" type="button" aria-label="Nächster Titel" title="Nächster Titel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5v14M5 6l12 6-12 6z"/></svg></button>
+<button id="muteToggle" type="button" aria-label="Stumm schalten" title="Stumm schalten"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5zM15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg></button>
+</div>
+<div class="progress-row"><span id="elapsed">0:00</span><input id="seek" type="range" min="0" max="1000" value="0" aria-label="Wiedergabeposition" disabled><span id="duration">–:––</span></div>
+<div class="picker-wrap"><div class="picker-caption">TITEL AUSWÄHLEN</div><select id="trackPicker" class="track-picker" aria-label="Titel auswählen – Liste öffnen"><option>Musik wird gesucht …</option></select></div>
+</section>
+<button id="showPlayer" class="show-player" type="button" aria-label="Musiksteuerung einblenden" title="Musiksteuerung einblenden" hidden>♫ <span>Musik</span> <span aria-hidden="true">⌃</span></button>
 </main>
 <script>
 const TARGET=new Date("2027-09-17T00:00:00+02:00");
-function update(){
- const d=TARGET.getTime()-Date.now();
- const days=d<=0?0:Math.ceil(d/86400000);
- document.getElementById("days").textContent=days.toLocaleString("de-DE");
-}
+function update(){const d=TARGET.getTime()-Date.now();const days=d<=0?0:Math.ceil(d/86400000);document.getElementById("days").textContent=days.toLocaleString("de-DE")}
 update();setInterval(update,30000);
-
-
-/* Musik: Dateiname frei; bei mehreren MP3s zufaellige Auswahl pro Aufruf. */
-const audio=document.getElementById("music");
-const play=document.getElementById("playPause");
-const mute=document.getElementById("muteToggle");
-const playIcon=document.getElementById("playIcon");
-const volumeIcon=document.getElementById("volumeIcon");
-let musicReady=false;
-let lookupInProgress=null;
-
-// Buttons bleiben auch bei einer fehlgeschlagenen GitHub-Abfrage sichtbar.
-play.style.display="flex";
-mute.style.display="flex";
-function renderMusic(){
- const playing=!audio.paused&&!audio.ended;
- playIcon.innerHTML=playing?'<path d="M7 5v14M17 5v14"/>':'<path d="M8 5v14l11-7z"/>';
- play.setAttribute("aria-label",playing?"Musik pausieren":musicReady?"Musik abspielen":"Musik suchen und abspielen");
- play.title=play.getAttribute("aria-label");
- volumeIcon.innerHTML=audio.muted?'<path d="M11 5 6 9H3v6h3l5 4V5zM16 9l5 6m0-6-5 6"/>':'<path d="M11 5 6 9H3v6h3l5 4V5zM15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/>';
- mute.setAttribute("aria-label",audio.muted?"Ton einschalten":"Ton ausschalten");
- mute.title=mute.getAttribute("aria-label");
-}
-["play","pause","ended","volumechange"].forEach(e=>audio.addEventListener(e,renderMusic));
-mute.addEventListener("click",()=>{audio.muted=!audio.muted;renderMusic()});
-
-const owner=location.hostname.split(".")[0];
-const repo=location.pathname.split("/").filter(Boolean)[0];
+const $=id=>document.getElementById(id);
+const audio=$("music"),play=$("playPause"),mute=$("muteToggle"),picker=$("trackPicker"),title=$("trackTitle");
+const owner=location.hostname.split(".")[0],repo=location.pathname.split("/").filter(Boolean)[0];
 const apiRoot=`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+let tracks=[],current=-1,loading=null;
+
 async function getJson(url){
- const response=await fetch(url+(url.includes("?")?"&":"?")+"_="+Date.now(),{cache:"no-store",headers:{Accept:"application/vnd.github+json"}});
- if(!response.ok)throw Error("GitHub-Antwort: "+response.status);
- return response.json();
+ const r=await fetch(url+(url.includes("?")?"&":"?")+"_="+Date.now(),{cache:"no-store",headers:{Accept:"application/vnd.github+json"}});
+ if(!r.ok)throw Error("GitHub-Antwort: "+r.status);return r.json()
 }
-async function findMusic(){
- // GitHub Contents ist der Standardweg; Trees ist eine unabhängige Listenroute.
+function clock(s){if(!Number.isFinite(s)||s<0)return "–:––";s=Math.floor(s);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function renderProgress(){
+ const valid=Number.isFinite(audio.duration)&&audio.duration>0;
+ $("elapsed").textContent=clock(audio.currentTime||0);
+ $("duration").textContent=valid?clock(audio.duration):"–:––";
+ $("seek").disabled=!valid;
+ if(!seeking)$("seek").value=valid?Math.round(audio.currentTime/audio.duration*1000):0;
+}
+let seeking=false;
+function render(){
+ play.innerHTML=audio.paused?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
+ mute.innerHTML=audio.muted||audio.volume===0?'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5zM16 9l5 6m0-6-5 6"/></svg>':'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5zM15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></svg>';
+ play.setAttribute("aria-label",audio.paused?"Abspielen":"Pausieren");
+ title.textContent=current<0?"Keine MP3 gefunden":tracks[current].name.replace(/\.mp3$/i,"");
+ picker.value=String(current);renderProgress()
+}
+function setTrack(i,autoplay=false){
+ if(!tracks.length)return;
+ current=(i+tracks.length)%tracks.length;
+ audio.src=tracks[current].url;audio.load();renderProgress();render();
+ if(autoplay)audio.play().catch(e=>console.warn("Audiostart:",e))
+}
+async function findTracks(){
+ let entries=[];
  try{
-  const entries=await getJson(apiRoot+"/contents");
-  if(!Array.isArray(entries))throw Error("Keine Dateiliste");
-  const mp3=entries.filter(f=>f.type==="file"&&/\.mp3$/i.test(f.name));
-  if(mp3.length>0)return mp3[Math.floor(Math.random()*mp3.length)].download_url;
- }catch(e){console.warn("MP3-Suche über Contents:",e)}
- const tree=await getJson(apiRoot+"/git/trees/HEAD?recursive=1");
- const mp3=(tree.tree||[]).filter(f=>f.type==="blob"&&!f.path.includes("/")&&/\.mp3$/i.test(f.path));
- if(mp3.length===0)throw Error("Keine MP3 gefunden.");
- const chosen=mp3[Math.floor(Math.random()*mp3.length)];
- return `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/HEAD/${chosen.path.split("/").map(encodeURIComponent).join("/")}`;
+  const files=await getJson(apiRoot+"/contents");
+  if(!Array.isArray(files))throw Error("Keine Dateiliste");
+  entries=files.filter(f=>f.type==="file"&&/\.mp3$/i.test(f.name)).map(f=>({name:f.name,url:f.download_url}))
+ }catch(e){console.warn("Contents-Abfrage:",e)}
+ if(!entries.length){
+  const tree=await getJson(apiRoot+"/git/trees/HEAD?recursive=1");
+  entries=(tree.tree||[]).filter(f=>f.type==="blob"&&!f.path.includes("/")&&/\.mp3$/i.test(f.path)).map(f=>({name:f.path,url:`https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/HEAD/${f.path.split("/").map(encodeURIComponent).join("/")}`}))
+ }
+ return entries.sort((a,b)=>a.name.localeCompare(b.name,"de"))
 }
-async function loadMusic(){
- if(musicReady)return true;
- if(lookupInProgress)return lookupInProgress;
- lookupInProgress=(async()=>{
+async function loadTracks(){
+ if(loading)return loading;
+ loading=(async()=>{
   try{
-   const url=await findMusic();
-   audio.src=url;
-   audio.preload="metadata";
-   musicReady=true;
-   play.title="Musik abspielen";
-   renderMusic();
-   return true;
-  }catch(e){
-   console.warn("MP3 derzeit nicht ermittelbar:",e);
-   play.title="MP3 nicht gefunden – zum erneuten Suchen tippen";
-   return false;
-  }finally{lookupInProgress=null}
+   tracks=await findTracks();picker.innerHTML="";
+   if(!tracks.length){picker.add(new Option("Keine MP3 gefunden","-1"));render();return false}
+   tracks.forEach((t,i)=>picker.add(new Option(t.name.replace(/\.mp3$/i,""),String(i))));
+   setTrack(Math.floor(Math.random()*tracks.length));return true
+  }catch(e){console.warn("MP3-Suche:",e);title.textContent="Musik nicht gefunden – ▶ erneut versuchen";return false}
+  finally{loading=null}
  })();
- return lookupInProgress;
+ return loading
 }
 play.addEventListener("click",async()=>{
- if(!audio.paused){audio.pause();return}
- if(!await loadMusic())return;
- try{await audio.play()}catch(e){console.warn("Browser verhindert Audiostart:",e)}
- renderMusic();
+ if(!tracks.length){if(!await loadTracks())return}
+ if(audio.paused){try{await audio.play()}catch(e){console.warn("Audiostart:",e)}}
+ else audio.pause();render()
 });
-renderMusic();
-// Unabhängig von der Bildsuche. Auf dem Mac kann der Nutzer jederzeit erneut suchen.
-loadMusic().then(ok=>{if(ok)audio.play().catch(()=>renderMusic())});
+$("previous").addEventListener("click",async()=>{if(!tracks.length&&!(await loadTracks()))return;setTrack(current-1,true)});
+$("next").addEventListener("click",async()=>{if(!tracks.length&&!(await loadTracks()))return;setTrack(current+1,true)});
+picker.addEventListener("change",()=>setTrack(Number(picker.value),true));
+mute.addEventListener("click",()=>{audio.muted=!audio.muted;render()});
+const seek=$("seek");
+seek.addEventListener("pointerdown",()=>{seeking=true});
+seek.addEventListener("pointerup",()=>{seeking=false;renderProgress()});
+seek.addEventListener("change",()=>{seeking=false;renderProgress()});
+seek.addEventListener("input",e=>{
+ if(Number.isFinite(audio.duration)&&audio.duration>0){audio.currentTime=audio.duration*Number(e.target.value)/1000;$("elapsed").textContent=clock(audio.currentTime)}
+});
+["timeupdate","loadedmetadata","durationchange","seeking","seeked"].forEach(e=>audio.addEventListener(e,renderProgress));
+["play","pause","ended","volumechange"].forEach(e=>audio.addEventListener(e,render));
 
-/* Die bestehende Bildauswahl bleibt in ihrer Wirkung unverändert. */
+/* Automatisch nach 6 Sekunden einklappen; jede Interaktion im Player setzt den Timer zurück. */
+const player=$("player"), showPlayer=$("showPlayer");
+let hideTimer=null;
+function collapsePlayer(){
+ if(player.matches(":focus-within")||seeking){scheduleHide();return}
+ player.classList.add("collapsed");showPlayer.hidden=false;
+}
+function scheduleHide(){clearTimeout(hideTimer);hideTimer=setTimeout(collapsePlayer,6000)}
+function expandPlayer(){player.classList.remove("collapsed");showPlayer.hidden=true;scheduleHide()}
+showPlayer.addEventListener("click",e=>{e.stopPropagation();expandPlayer()});
+$("photo").closest(".stage").addEventListener("click",e=>{
+ if(player.contains(e.target)||showPlayer.contains(e.target))return;
+ if(player.classList.contains("collapsed"))expandPlayer();
+});
+player.addEventListener("pointerdown",scheduleHide);
+player.addEventListener("change",scheduleHide);
+player.addEventListener("focusin",()=>clearTimeout(hideTimer));
+player.addEventListener("focusout",scheduleHide);
+scheduleHide();
+
+loadTracks().then(ok=>{if(ok)audio.play().catch(()=>render())});
 (async()=>{
- const photo=document.getElementById("photo");
- const backdrop=document.getElementById("backdrop");
  try{
-   const files=await getJson(apiRoot+"/contents");
-   const images=files.filter(f=>f.type==="file"&&/\.(jpe?g|png|webp)$/i.test(f.name));
-   if(images.length===0) throw new Error("Kein Bild gefunden.");
-   const chosenImage=images[Math.floor(Math.random()*images.length)];
-   const imageUrl=chosenImage.download_url+"?v="+Date.now();
-   photo.src=imageUrl;
-   backdrop.style.backgroundImage=`url("${imageUrl}")`;
+  const files=await getJson(apiRoot+"/contents");
+  const images=files.filter(f=>f.type==="file"&&/\.(jpe?g|png|webp)$/i.test(f.name));
+  if(!images.length)throw Error("Kein Bild gefunden");
+  const chosen=images[Math.floor(Math.random()*images.length)];
+  const url=chosen.download_url+"?v="+Date.now();
+  $("photo").src=url;$("backdrop").style.backgroundImage=`url("${url}")`;
  }catch(e){console.error(e)}
 })();
 </script>
-</body>
-</html>
+</body></html>
