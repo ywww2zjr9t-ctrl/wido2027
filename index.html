@@ -166,7 +166,7 @@ function expandPlayer(){player.classList.remove("collapsed");quickActions.hidden
 showPlayer.addEventListener("click",e=>{e.stopPropagation();expandPlayer()});
 $("photo").closest(".stage").addEventListener("click",e=>{
  if(player.contains(e.target)||quickActions.contains(e.target))return;
- if(player.classList.contains("collapsed"))expandPlayer();
+ if(player.classList.contains("collapsed") && !e.defaultPrevented)expandPlayer();
 });
 player.addEventListener("pointerdown",scheduleHide);
 player.addEventListener("change",scheduleHide);
@@ -189,7 +189,7 @@ async function changeImage(){
  try{
   // Bei jedem Wechsel aktuelle Bildliste abfragen, damit neue Uploads erkannt werden.
   const files=await getJson(apiRoot+"/contents");
-  imagesCache=files.filter(f=>f.type==="file"&&/\\.(jpe?g|png|webp)$/i.test(f.name)&&f.download_url);
+  imagesCache=files.filter(f=>f.type==="file"&&/\.(jpe?g|png|webp)$/i.test(f.name)&&f.download_url);
   if(!imagesCache.length)throw Error("Keine Bilder gefunden");
   const candidates=imagesCache.length>1?imagesCache.filter(f=>f.name!==lastImageName):imagesCache;
   const chosen=candidates[Math.floor(Math.random()*candidates.length)];
@@ -208,7 +208,7 @@ async function changeImage(){
   indicatorText("Neues Bild geladen");
  }catch(e){
   console.error("Bildwechsel:",e);
-  indicatorText("Bildwechsel fehlgeschlagen – erneut ziehen");
+  indicatorText("Bildwechsel fehlgeschlagen – erneut versuchen");
  }finally{
   imageBusy=false;
   newImage.disabled=false;

@@ -1,12 +1,14 @@
-# WiDo 2027 – Musiksteuerung 010
+WiDo 2027 – Musiksteuerung 011
 
-## Neu
-- Dezenter, halbtransparenter Button „↻ Neues Bild“ neben „Musik“, wenn die Musiksteuerung eingeklappt ist.
-- Ein Tippen lädt ein anderes Zufallsbild, ohne die Webseite neu zu laden.
-- Pull-to-Refresh bleibt erhalten.
-- Die laufende Musik, Wiedergabeposition und der Countdown bleiben unverändert.
+Fehlerkorrektur: Bilderkennung beim Bildwechsel.
+Der reguläre Ausdruck für .jpg/.jpeg/.png/.webp wurde korrigiert.
 
-## GitHub-Upload
-**Nur `index.html` ersetzen.** `README.md` ist die beiliegende Anleitung und muss nicht zwingend hochgeladen werden. MP3-Dateien und Bilder bleiben unverändert.
+Neues Bild per Button oder Pull-to-Refresh, ohne Neuladen der Seite.
+Musik, Wiedergabeposition, Countdown bleiben unangetastet.
 
-Ausgangsbasis: WiDo 2027 – Musiksteuerung 009 Pull-to-Refresh.
+GitHub: NUR index.html ersetzen.
+MP3-Dateien und Bilder nicht ändern.
+
+Dateien dieses ZIP:
+- index.html (ersetzen)
+- README.md (Dokumentation, optional mit hochladen)
