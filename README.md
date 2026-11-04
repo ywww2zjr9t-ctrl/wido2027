@@ -1,14 +1,11 @@
-WiDo 2027 – Musiksteuerung 011
+# WiDo 2027 – Version 013
 
-Fehlerkorrektur: Bilderkennung beim Bildwechsel.
-Der reguläre Ausdruck für .jpg/.jpeg/.png/.webp wurde korrigiert.
+- Musikmenü schließt sechs Sekunden nach der letzten Bedienung zuverlässig automatisch.
+- Tippen auf das Bild bei geöffnetem Menü schließt es sofort.
+- Musikmenü öffnet ausschließlich über den kleinen Button „Musik“.
+- Musik läuft beim Schließen und Öffnen unverändert weiter.
+- Version unten im Musikmenü: v013.
+- Bestehende Bildwechsel-Funktion und Countdown bleiben erhalten.
 
-Neues Bild per Button oder Pull-to-Refresh, ohne Neuladen der Seite.
-Musik, Wiedergabeposition, Countdown bleiben unangetastet.
-
-GitHub: NUR index.html ersetzen.
-MP3-Dateien und Bilder nicht ändern.
-
-Dateien dieses ZIP:
-- index.html (ersetzen)
-- README.md (Dokumentation, optional mit hochladen)
+## Installation
+Auf GitHub nur `index.html` ersetzen. MP3s und Bilder unverändert lassen.
